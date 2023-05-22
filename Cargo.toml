@@ -2,9 +2,14 @@
 name = "notify-run-rs-api"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+authors = ["gruvw <gruvw.dev@gmail.com>"]
+license-file = "LICENSE"
+description = "A Rust client for sending notifications to your own phone or desktop."
+homepage = "https://github.com/gruvw/notify-run-rs-api"
 
 [dependencies]
 clap = {version = "4.3.0", features = ["derive"]}
 qrcode = "0.12.0"
+reqwest = { version = "0.11.18", features = ["blocking", "json"] }
+serde = { version = "1.0.163", features = ["derive"] }
+url = "2.3.1"
