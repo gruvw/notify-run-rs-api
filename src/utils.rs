@@ -14,7 +14,7 @@ pub fn parse_url(text: &str) -> Result<Url, UrlError> {
         }
     } else {
         Err(UrlError::ParseError(format!(
-            "The provided text could not be parse as a valid URL. Provided: {}",
+            "The provided text could not be parsed as a valid URL. Provided: {}",
             text
         )))
     }

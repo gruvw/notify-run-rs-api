@@ -1,49 +1,58 @@
 mod error;
 mod utils;
 
-use std::fmt::Display;
+use std::{env, fmt::Display, fs};
 
-use error::{ConfigError, ServerError};
+use error::{ConfigError, ServerError, UrlError};
 use qrcode::{render::unicode, QrCode};
 use reqwest::{blocking::Client, header};
-use serde::Deserialize;
+use serde_json::json;
 use url::Url;
 use utils::parse_url;
 
 const DEFAULT_API_SERVER: &str = "https://notify.run/api/";
 const REGISTER_PATH: &str = "register_channel";
 const CHANNEL_PATH: &str = "/c/";
+const CHANNEL_KEY: &str = "channelId";
+
+const API_ENV_VAR: &str = "NOTIFY_API_SERVER";
+const CONFIG_PATH: &str = "~/.config/notify-run";
+const ENDPOINT_KEY: &str = "endpoint";
 
 pub struct Notify {
     api_server: Url,
     channel_id: String,
 }
 
-#[derive(Deserialize)]
-#[serde(rename_all = "camelCase")]
-struct RegisterResponse {
-    channel_id: String,
-}
-
 impl Notify {
-    pub fn new(api_server: &str, channel_id: &str) -> Result<Notify, ServerError> {
+    pub fn new(api_server: &str, channel_id: &str) -> Result<Notify, UrlError> {
         Ok(Notify {
-            api_server: parse_url(api_server).map_err(ServerError::Url)?,
+            api_server: parse_url(api_server)?,
             channel_id: channel_id.to_string(),
         })
     }
 
-    pub fn load_config() -> Result<Notify, ConfigError> {
-        // TODO endpoint from config
-        Notify::new("", "").map_err(ConfigError::ServerError)
+    pub fn from_endpoint(endpoint: &str) -> Result<Notify, UrlError> {
+        let parts: Vec<&str> = endpoint.rsplitn(2, '/').collect();
+        let channel_id = parts
+            .first()
+            .ok_or(UrlError::ParseError("Invalid endpoint".to_string()))?;
+        let api_server = parts
+            .get(1)
+            .ok_or(UrlError::ParseError("Invalid endpoint".to_string()))?;
+
+        Notify::new(api_server, channel_id)
     }
 
     pub fn register() -> Result<Notify, ServerError> {
-        Notify::register_from(DEFAULT_API_SERVER)
+        Notify::register_from(match env::var(API_ENV_VAR) {
+            Ok(server) => server,
+            Err(_) => DEFAULT_API_SERVER.to_string(),
+        })
     }
 
-    pub fn register_from(api_server: &str) -> Result<Notify, ServerError> {
-        let api_server = parse_url(api_server).map_err(ServerError::Url)?;
+    pub fn register_from(api_server: String) -> Result<Notify, ServerError> {
+        let api_server = parse_url(&api_server).map_err(ServerError::Url)?;
         let url = api_server
             .join(REGISTER_PATH)
             .expect("Registration join should always be valid");
@@ -57,10 +66,52 @@ impl Notify {
             .map_err(ServerError::Connection)?;
 
         let code = response.status();
-        let data = response
-            .json::<RegisterResponse>()
+        let text = response
+            .text()
             .map_err(|err| ServerError::Response(code, err))?;
-        Notify::new(api_server.as_str(), &data.channel_id)
+        let json: serde_json::Value = serde_json::from_str(&text)
+            .map_err(|_| ServerError::Parse("Invalid JSON response".to_string()))?;
+
+        let channel = json[CHANNEL_KEY]
+            .as_str()
+            .ok_or(ServerError::Parse(format!(
+                "Could not find {} key in JSON response",
+                CHANNEL_KEY
+            )))?;
+
+        Notify::new(api_server.as_str(), channel).map_err(ServerError::Url)
+    }
+
+    pub fn is_configured() -> bool {
+        !matches!(Notify::from_config(), Err(ConfigError::Access(_)))
+    }
+
+    pub fn from_config() -> Result<Notify, ConfigError> {
+        let json: serde_json::Value = serde_json::from_str(
+            &fs::read_to_string(shellexpand::tilde(CONFIG_PATH).as_ref())
+                .map_err(|e| ConfigError::Access(format!("{}", e)))?,
+        )
+        .map_err(|_| ConfigError::Parse("Invalid JSON in config".to_string()))?;
+
+        let endpoint = json[ENDPOINT_KEY]
+            .as_str()
+            .ok_or(ConfigError::Parse(format!(
+                "Could not find {} key in JSON config",
+                ENDPOINT_KEY
+            )))?;
+
+        Self::from_endpoint(endpoint).map_err(ConfigError::UrlError)
+    }
+
+    pub fn update_config(&self) -> Result<Notify, ConfigError> {
+        let json = json!({ ENDPOINT_KEY: self.endpoint().as_str() });
+        fs::write(
+            shellexpand::tilde(CONFIG_PATH).as_ref(),
+            serde_json::to_string(&json).expect("JSON config should always be valid"),
+        )
+        .map_err(|_| ConfigError::Write("Could not write config".to_string()))?;
+
+        Self::from_config()
     }
 
     pub fn server(&self) -> Url {
@@ -84,7 +135,7 @@ impl Notify {
     pub fn channel(&self) -> Url {
         self.api_server
             .join(CHANNEL_PATH)
-            .expect("Channel join should always work")
+            .expect("Channel path join should always work")
             .join(&self.channel_id)
             .expect("Channel ID join should always work")
     }

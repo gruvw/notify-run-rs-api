@@ -39,10 +39,10 @@ pub struct InfoArgs {
 #[derive(Args)]
 pub struct RegisterArgs {
     #[arg(short, long)]
-    /// Change server URL, defaults to https://notify.run/api/
+    /// Set server URL, defaults to https://notify.run/api/ or the value of the NOTIFY_API_SERVER environment variable
     pub api_server: Option<String>,
 
     #[arg(short, long)]
     /// Don't prompt for config overwrite
-    force: bool,
+    pub force: bool,
 }

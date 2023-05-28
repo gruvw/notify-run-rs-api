@@ -26,6 +26,7 @@ impl Display for UrlError {
 pub enum ServerError {
     Url(UrlError),
     Response(StatusCode, reqwest::Error),
+    Parse(String),
     Connection(reqwest::Error),
 }
 
@@ -38,6 +39,7 @@ impl Display for ServerError {
                 write!(f, "Response: status code {}, ", code)?;
                 err.fmt(f)
             }
+            Self::Parse(text) => write!(f, "Parse: {}", text),
             Self::Connection(err) => {
                 write!(f, "Connection: ")?;
                 err.fmt(f)
@@ -48,16 +50,20 @@ impl Display for ServerError {
 
 #[derive(Debug)]
 pub enum ConfigError {
-    ConfigNotFound(String),
-    ServerError(ServerError),
+    Access(String),
+    Parse(String),
+    Write(String),
+    UrlError(UrlError),
 }
 
 impl Display for ConfigError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Config > ")?;
         match self {
-            Self::ConfigNotFound(text) => write!(f, "ConfigNotFound: {}", text),
-            Self::ServerError(err) => err.fmt(f),
+            Self::Access(text) => write!(f, "ConfigNotFound: {}", text),
+            Self::Parse(text) => write!(f, "Parse: {}", text),
+            Self::Write(text) => write!(f, "Parse: {}", text),
+            Self::UrlError(err) => err.fmt(f),
         }
     }
 }
