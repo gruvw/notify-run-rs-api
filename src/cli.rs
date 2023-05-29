@@ -18,6 +18,7 @@ pub enum Commands {
 
     /// Register a new endpoint
     Register(RegisterArgs),
+    // TODO Send command & args
 }
 
 #[derive(Args)]
@@ -27,7 +28,7 @@ pub struct ConfigureArgs {
 
     #[arg(short, long)]
     /// Don't prompt for config overwrite
-    force: bool,
+    pub force: bool,
 }
 
 #[derive(Args)]

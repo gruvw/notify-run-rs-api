@@ -83,7 +83,7 @@ impl Notify {
     }
 
     pub fn is_configured() -> bool {
-        !matches!(Notify::from_config(), Err(ConfigError::Access(_)))
+        matches!(Notify::from_config(), Ok(_))
     }
 
     pub fn from_config() -> Result<Notify, ConfigError> {
