@@ -14,11 +14,13 @@ pub enum Commands {
     Configure(ConfigureArgs),
 
     /// Get information for subscribing to an endpoint
-    Info(InfoArgs),
+    Info(InfoArgs), // TODO
 
     /// Register a new endpoint
     Register(RegisterArgs),
-    // TODO Send command & args
+
+    // Send a new message
+    Send(SendArgs),
 }
 
 #[derive(Args)]
@@ -46,4 +48,18 @@ pub struct RegisterArgs {
     #[arg(short, long)]
     /// Don't prompt for config overwrite
     pub force: bool,
+}
+
+#[derive(Args)]
+pub struct SendArgs {
+    /// The message text to be sent.
+    pub message: String,
+
+    #[arg(short, long)]
+    /// Notification endpoint URL
+    pub endpoint: Option<String>,
+
+    #[arg(short, long)]
+    /// An optional URL to open if the notification is clicked.
+    pub action: Option<String>,
 }

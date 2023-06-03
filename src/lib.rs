@@ -1,12 +1,12 @@
 mod error;
 mod utils;
 
-use std::{env, fmt::Display, fs};
+use std::{collections::HashMap, env, fmt::Display, fs};
 
 use error::{ConfigError, ServerError, UrlError};
 use qrcode::{render::unicode, QrCode};
 use reqwest::{blocking::Client, header};
-use serde_json::json;
+use serde_json::{self, json};
 use url::Url;
 use utils::parse_url;
 
@@ -17,11 +17,15 @@ const CHANNEL_KEY: &str = "channelId";
 
 const API_ENV_VAR: &str = "NOTIFY_API_SERVER";
 const CONFIG_PATH: &str = "~/.config/notify-run";
+const USER_AGENT: &str = "NotifyRun Rust Client";
 const ENDPOINT_KEY: &str = "endpoint";
+const MESSAGE_KEY: &str = "message";
+const ACTION_KEY: &str = "action";
 
 pub struct Notify {
     api_server: Url,
     channel_id: String,
+    client: Client,
 }
 
 impl Notify {
@@ -29,6 +33,7 @@ impl Notify {
         Ok(Notify {
             api_server: parse_url(api_server)?,
             channel_id: channel_id.to_string(),
+            client: Client::new(),
         })
     }
 
@@ -60,7 +65,7 @@ impl Notify {
         let client = Client::new();
         let response = client
             .post(url)
-            .header(header::USER_AGENT, "NotifyRun Rust Client")
+            .header(header::USER_AGENT, USER_AGENT)
             .header(header::CONTENT_LENGTH, 0)
             .send()
             .map_err(ServerError::Connection)?;
@@ -138,6 +143,35 @@ impl Notify {
             .expect("Channel path join should always work")
             .join(&self.channel_id)
             .expect("Channel ID join should always work")
+    }
+
+    pub fn send_action(&self, message: &str, action: &str) -> Result<(), ServerError> {
+        let mut params = HashMap::new();
+        params.insert(MESSAGE_KEY, message);
+        if !action.is_empty() {
+            params.insert(ACTION_KEY, action);
+        }
+
+        let response = self
+            .client
+            .post(self.endpoint())
+            .header(header::USER_AGENT, USER_AGENT)
+            .header(header::ACCEPT, "*/*")
+            .form(&params)
+            .body(message.to_string())
+            .send()
+            .map_err(ServerError::Connection)?;
+
+        let code = response.status();
+        response
+            .error_for_status()
+            .map_err(|e| ServerError::Response(code, e))?;
+
+        Ok(())
+    }
+
+    pub fn send(&self, message: &str) -> Result<(), ServerError> {
+        self.send_action(message, "")
     }
 }
 

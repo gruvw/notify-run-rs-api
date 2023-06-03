@@ -62,6 +62,26 @@ fn main() -> Result<(), String> {
             Ok(())
         }
 
+        Commands::Send(args) => {
+            let notify = if let Some(endpoint) = &args.endpoint {
+                Notify::from_endpoint(endpoint).map_err(|e| format!("{}", e))?
+            } else if let Ok(notify) = Notify::from_config() {
+                notify
+            } else {
+                return Err(
+                    "No endpoint found! Run 'register' or 'configure' first. See help for more details."
+                        .to_string(),
+                );
+            };
+
+            if let Some(action) = &args.action {
+                notify.send_action(&args.message, action)
+            } else {
+                notify.send(&args.message)
+            }
+            .map_err(|e| format!("{}", e))
+        }
+
         _ => Ok(()),
     }
 }
