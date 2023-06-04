@@ -8,6 +8,7 @@ description = "A Rust client for sending notifications to your own phone or desk
 homepage = "https://github.com/gruvw/notify-run-rs-api"
 
 [dependencies]
+chrono = "0.4.26"
 clap = {version = "4.3.0", features = ["derive"]}
 inquire = "0.6.2"
 qrcode = "0.12.0"

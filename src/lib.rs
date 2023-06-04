@@ -3,6 +3,7 @@ mod utils;
 
 use std::{collections::HashMap, env, fmt::Display, fs};
 
+use chrono::{DateTime, FixedOffset};
 use error::{ConfigError, ServerError, UrlError};
 use qrcode::{render::unicode, QrCode};
 use reqwest::{blocking::Client, header};
@@ -26,6 +27,11 @@ pub struct Notify {
     api_server: Url,
     channel_id: String,
     client: Client,
+}
+
+pub struct Message {
+    content: String,
+    time: DateTime<FixedOffset>,
 }
 
 impl Notify {

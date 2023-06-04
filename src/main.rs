@@ -5,27 +5,6 @@ use cli::{Cli, Commands};
 use inquire::Confirm;
 use notify_run_rs_api::Notify;
 
-/// Returns true if the config should be overwritten, else otherwise
-fn should_write(force: bool) -> Result<bool, String> {
-    if !force {
-        if let Ok(notify) = Notify::from_config() {
-            let ans = Confirm::new(&format!(
-                "Overwrite existing configuration ({})?",
-                notify.endpoint()
-            ))
-            .with_default(false)
-            .prompt();
-
-            return match ans {
-                Ok(res) => Ok(res),
-                Err(_) => Err("Error with prompt, try again later.".to_string()),
-            };
-        }
-    }
-
-    Ok(true)
-}
-
 /// NotifyRun Rust Client CLI entrypoint
 fn main() -> Result<(), String> {
     let cli = Cli::parse();
@@ -63,16 +42,7 @@ fn main() -> Result<(), String> {
         }
 
         Commands::Send(args) => {
-            let notify = if let Some(endpoint) = &args.endpoint {
-                Notify::from_endpoint(endpoint).map_err(|e| format!("{}", e))?
-            } else if let Ok(notify) = Notify::from_config() {
-                notify
-            } else {
-                return Err(
-                    "No endpoint found! Run 'register' or 'configure' first. See help for more details."
-                        .to_string(),
-                );
-            };
+            let notify = get_notify_instance(&args.endpoint)?;
 
             if let Some(action) = &args.action {
                 notify.send_action(&args.message, action)
@@ -82,6 +52,48 @@ fn main() -> Result<(), String> {
             .map_err(|e| format!("{}", e))
         }
 
-        _ => Ok(()),
+        Commands::Info(args) => {
+            let notify = get_notify_instance(&args.endpoint)?;
+
+            // TODO get infos and print it out to console
+
+            Ok(())
+        }
+    }
+}
+
+/// Returns true if the config should be overwritten, else otherwise
+fn should_write(force: bool) -> Result<bool, String> {
+    if !force {
+        if let Ok(notify) = Notify::from_config() {
+            let ans = Confirm::new(&format!(
+                "Overwrite existing configuration ({})?",
+                notify.endpoint()
+            ))
+            .with_default(false)
+            .prompt();
+
+            return match ans {
+                Ok(res) => Ok(res),
+                Err(_) => Err("Error with prompt, try again later.".to_string()),
+            };
+        }
+    }
+
+    Ok(true)
+}
+
+/// Returns the Notify instance.
+/// Tries to get it from passed endpoint first, from config otherwise.
+fn get_notify_instance(endpoint: &Option<String>) -> Result<Notify, String> {
+    if let Some(endpoint) = endpoint {
+        Ok(Notify::from_endpoint(endpoint).map_err(|e| format!("{}", e))?)
+    } else if let Ok(notify) = Notify::from_config() {
+        Ok(notify)
+    } else {
+        return Err(
+            "No endpoint found! Run 'register' or 'configure' first. See help for more details."
+                .to_string(),
+        );
     }
 }

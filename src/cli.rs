@@ -14,7 +14,7 @@ pub enum Commands {
     Configure(ConfigureArgs),
 
     /// Get information for subscribing to an endpoint
-    Info(InfoArgs), // TODO
+    Info(InfoArgs),
 
     /// Register a new endpoint
     Register(RegisterArgs),
@@ -36,7 +36,7 @@ pub struct ConfigureArgs {
 #[derive(Args)]
 pub struct InfoArgs {
     /// Notification endpoint URL
-    pub endpoint: String,
+    pub endpoint: Option<String>,
 }
 
 #[derive(Args)]
