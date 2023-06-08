@@ -723,7 +723,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "notify-run-rs-api"
+name = "notify-run"
 version = "0.1.0"
 dependencies = [
  "chrono",

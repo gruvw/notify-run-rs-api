@@ -3,7 +3,7 @@ mod cli;
 use clap::Parser;
 use cli::{Cli, Commands};
 use inquire::Confirm;
-use notify_run_rs_api::Notify;
+use notify_run::notify::Notify;
 
 /// NotifyRun Rust Client CLI entrypoint
 fn main() -> Result<(), String> {
@@ -91,9 +91,9 @@ fn get_notify_instance(endpoint: &Option<String>) -> Result<Notify, String> {
     } else if let Ok(notify) = Notify::from_config() {
         Ok(notify)
     } else {
-        return Err(
+        Err(
             "No endpoint found! Run 'register' or 'configure' first. See help for more details."
                 .to_string(),
-        );
+        )
     }
 }

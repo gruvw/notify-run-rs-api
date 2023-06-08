@@ -1,11 +1,11 @@
 [package]
-name = "notify-run-rs-api"
+name = "notify-run"
 version = "0.1.0"
 edition = "2021"
-authors = ["gruvw <gruvw.dev@gmail.com>"]
-license-file = "LICENSE"
 description = "A Rust client for sending notifications to your own phone or desktop."
 homepage = "https://github.com/gruvw/notify-run-rs-api"
+authors = ["gruvw <gruvw.dev@gmail.com>"]
+license-file = "LICENSE"
 
 [dependencies]
 chrono = "0.4.26"
