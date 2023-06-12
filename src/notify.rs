@@ -1,7 +1,9 @@
 use std::{collections::HashMap, env, fmt::Display, fs};
 
 use crate::error::{ConfigError, ServerError, UrlError};
+use crate::message::Message;
 use crate::utils::parse_url;
+use chrono::DateTime;
 use qrcode::{render::unicode, QrCode};
 use reqwest::{blocking::Client, header};
 use serde_json::{self, json};
@@ -9,8 +11,8 @@ use url::Url;
 
 const DEFAULT_API_SERVER: &str = "https://notify.run/api/";
 const REGISTER_PATH: &str = "register_channel";
+const INFO_PATH: &str = "json";
 const CHANNEL_PATH: &str = "/c/";
-const CHANNEL_KEY: &str = "channelId";
 
 const API_ENV_VAR: &str = "NOTIFY_API_SERVER";
 const CONFIG_PATH: &str = "~/.config/notify-run";
@@ -18,6 +20,9 @@ const USER_AGENT: &str = "NotifyRun Rust Client";
 const ENDPOINT_KEY: &str = "endpoint";
 const MESSAGE_KEY: &str = "message";
 const ACTION_KEY: &str = "action";
+const CHANNEL_KEY: &str = "channelId";
+const MESSAGES_KEY: &str = "messages";
+const TIME_KEY: &str = "time";
 
 pub struct Notify {
     api_server: Url,
@@ -67,10 +72,9 @@ impl Notify {
             .send()
             .map_err(ServerError::Connection)?;
 
-        let code = response.status();
         let text = response
             .text()
-            .map_err(|err| ServerError::Response(code, err))?;
+            .map_err(|err| ServerError::Response(err.status().unwrap(), err))?;
         let json: serde_json::Value = serde_json::from_str(&text)
             .map_err(|_| ServerError::Parse("Invalid JSON response".to_string()))?;
 
@@ -159,16 +163,58 @@ impl Notify {
             .send()
             .map_err(ServerError::Connection)?;
 
-        let code = response.status();
         response
             .error_for_status()
-            .map_err(|e| ServerError::Response(code, e))?;
+            .map_err(|err| ServerError::Response(err.status().unwrap(), err))?;
 
         Ok(())
     }
 
     pub fn send(&self, message: &str) -> Result<(), ServerError> {
         self.send_action(message, "")
+    }
+
+    pub fn messages(&self) -> Result<Vec<Message>, ServerError> {
+        let mut url = self.endpoint();
+        url.path_segments_mut().unwrap().push(INFO_PATH);
+
+        let response = self
+            .client
+            .get(url)
+            .header(header::USER_AGENT, USER_AGENT)
+            .send()
+            .map_err(ServerError::Connection)?;
+
+        let text = response
+            .text()
+            .map_err(|err| ServerError::Response(err.status().unwrap(), err))?;
+        let json: serde_json::Value = serde_json::from_str(&text)
+            .map_err(|_| ServerError::Parse("Invalid JSON response".to_string()))?;
+
+        Ok(json
+            .get(MESSAGES_KEY)
+            .expect("Messages should alway be present")
+            .as_array()
+            .expect("Messages should be an array")
+            .iter()
+            .map(|msg| {
+                // TODO convert expects to ServerError
+                let content = msg
+                    .get(MESSAGE_KEY)
+                    .expect("Message should have content")
+                    .as_str()
+                    .expect("Message content should be text");
+                let time = DateTime::parse_from_rfc3339(
+                    msg.get(TIME_KEY)
+                        .expect("Message should have timestamp")
+                        .as_str()
+                        .expect("Message content should be text"),
+                )
+                .expect("Could not parse timestamp");
+
+                Message::new(content.to_string(), time)
+            })
+            .collect())
     }
 }
 

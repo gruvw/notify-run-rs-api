@@ -54,8 +54,17 @@ fn main() -> Result<(), String> {
 
         Commands::Info(args) => {
             let notify = get_notify_instance(&args.endpoint)?;
+            let messages = notify.messages().map_err(|e| format!("{}", e))?;
 
-            // TODO get infos and print it out to console
+            println!("{}", notify);
+            println!("Messages history:");
+
+            if messages.is_empty() {
+                println!("No messages.")
+            }
+            for message in messages {
+                println!("{}", message);
+            }
 
             Ok(())
         }

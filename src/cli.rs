@@ -35,6 +35,7 @@ pub struct ConfigureArgs {
 
 #[derive(Args)]
 pub struct InfoArgs {
+    #[arg(short, long)]
     /// Notification endpoint URL
     pub endpoint: Option<String>,
 }
