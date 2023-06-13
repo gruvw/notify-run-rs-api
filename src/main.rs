@@ -71,7 +71,7 @@ fn main() -> Result<(), String> {
     }
 }
 
-/// Returns true if the config should be overwritten, else otherwise
+/// Returns true if the config should be overwritten, false otherwise
 fn should_write(force: bool) -> Result<bool, String> {
     if !force {
         if let Ok(notify) = Notify::from_config() {

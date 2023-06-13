@@ -6,7 +6,7 @@ use crate::utils::parse_url;
 use chrono::DateTime;
 use qrcode::{render::unicode, QrCode};
 use reqwest::{blocking::Client, header};
-use serde_json::{self, json};
+use serde_json::{self, json, Value};
 use url::Url;
 
 const DEFAULT_API_SERVER: &str = "https://notify.run/api/";
@@ -191,30 +191,17 @@ impl Notify {
         let json: serde_json::Value = serde_json::from_str(&text)
             .map_err(|_| ServerError::Parse("Invalid JSON response".to_string()))?;
 
-        Ok(json
-            .get(MESSAGES_KEY)
-            .expect("Messages should alway be present")
+        json.get(MESSAGES_KEY)
+            .ok_or(ServerError::Parse(
+                "JSON response does not contains messages".to_string(),
+            ))?
             .as_array()
-            .expect("Messages should be an array")
+            .ok_or(ServerError::Parse(
+                "JSON response messages type is not an array".to_string(),
+            ))?
             .iter()
-            .map(|msg| {
-                // TODO convert expects to ServerError
-                let content = msg
-                    .get(MESSAGE_KEY)
-                    .expect("Message should have content")
-                    .as_str()
-                    .expect("Message content should be text");
-                let time = DateTime::parse_from_rfc3339(
-                    msg.get(TIME_KEY)
-                        .expect("Message should have timestamp")
-                        .as_str()
-                        .expect("Message content should be text"),
-                )
-                .expect("Could not parse timestamp");
-
-                Message::new(content.to_string(), time)
-            })
-            .collect())
+            .map(decode_msg)
+            .collect::<Result<Vec<_>, _>>()
     }
 }
 
@@ -235,4 +222,29 @@ impl Display for Notify {
             image
         )
     }
+}
+
+fn decode_msg(msg: &Value) -> Result<Message, ServerError> {
+    let content = msg
+        .get(MESSAGE_KEY)
+        .ok_or(ServerError::Parse(
+            "JSON response does not contain message".to_string(),
+        ))?
+        .as_str()
+        .ok_or(ServerError::Parse(
+            "JSON response message content should be text".to_string(),
+        ))?;
+    let time = DateTime::parse_from_rfc3339(
+        msg.get(TIME_KEY)
+            .ok_or(ServerError::Parse(
+                "JSON response message content should have timestamp".to_string(),
+            ))?
+            .as_str()
+            .ok_or(ServerError::Parse(
+                "JSON response message timestamp should be text".to_string(),
+            ))?,
+    )
+    .map_err(|_| ServerError::Parse("Could not parse timestamp".to_string()))?;
+
+    Ok(Message::new(content.to_string(), time))
 }
