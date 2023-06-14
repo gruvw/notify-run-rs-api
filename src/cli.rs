@@ -3,12 +3,14 @@ use clap::{Args, Parser, Subcommand};
 #[derive(Parser)]
 #[command(author, version, about)]
 #[command(propagate_version = true)]
+// CLI application object
 pub struct Cli {
     #[command(subcommand)]
     pub command: Commands,
 }
 
 #[derive(Subcommand)]
+// Possible CLI commands
 pub enum Commands {
     /// Configure to an existing endpoint
     Configure(ConfigureArgs),
@@ -24,6 +26,7 @@ pub enum Commands {
 }
 
 #[derive(Args)]
+// Arguments for the configure command
 pub struct ConfigureArgs {
     /// Notification endpoint URL
     pub endpoint: String,
@@ -34,6 +37,7 @@ pub struct ConfigureArgs {
 }
 
 #[derive(Args)]
+// Arguments for the info command
 pub struct InfoArgs {
     #[arg(short, long)]
     /// Notification endpoint URL
@@ -41,6 +45,7 @@ pub struct InfoArgs {
 }
 
 #[derive(Args)]
+// Arguments for the register command
 pub struct RegisterArgs {
     #[arg(short, long)]
     /// Set server URL, defaults to https://notify.run/api/ or the value of the NOTIFY_API_SERVER environment variable
@@ -52,6 +57,7 @@ pub struct RegisterArgs {
 }
 
 #[derive(Args)]
+// Arguments for the send command
 pub struct SendArgs {
     /// The message text to be sent.
     pub message: String,

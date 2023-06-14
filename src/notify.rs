@@ -24,6 +24,7 @@ const CHANNEL_KEY: &str = "channelId";
 const MESSAGES_KEY: &str = "messages";
 const TIME_KEY: &str = "time";
 
+// Notification object. Use to access and interact with a notify.run endpoint
 pub struct Notify {
     api_server: Url,
     channel_id: String,
