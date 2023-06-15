@@ -10,19 +10,16 @@ use crate::{
 
 pub fn parse_url(text: &str) -> Result<Url, UrlError> {
     if let Ok(url) = Url::parse(text) {
-        if url.scheme() == "http" || url.scheme() == "https" {
+        let scheme = url.scheme();
+        if scheme == "http" || scheme == "https" {
             Ok(url)
         } else {
-            Err(UrlError::InvalidScheme(format!(
-                "The provided URL scheme was neither 'http' nor 'https'. Provided: {}",
-                text
-            )))
+            Err(UrlError::InvalidScheme {
+                scheme: scheme.into(),
+            })
         }
     } else {
-        Err(UrlError::ParseError(format!(
-            "The provided text could not be parsed as a valid URL. Provided: {}",
-            text
-        )))
+        Err(UrlError::ParseError { text: text.into() })
     }
 }
 
@@ -30,23 +27,23 @@ pub fn decode_msg(msg: &Value) -> Result<Message, ServerError> {
     let content = msg
         .get(MESSAGE_KEY)
         .ok_or(ServerError::Parse(
-            "JSON response does not contain message".to_string(),
+            "JSON response does not contain message".into(),
         ))?
         .as_str()
         .ok_or(ServerError::Parse(
-            "JSON response message content should be text".to_string(),
+            "JSON response message content should be text".into(),
         ))?;
     let time = DateTime::parse_from_rfc3339(
         msg.get(TIME_KEY)
             .ok_or(ServerError::Parse(
-                "JSON response message content should have timestamp".to_string(),
+                "JSON response message content should have timestamp".into(),
             ))?
             .as_str()
             .ok_or(ServerError::Parse(
-                "JSON response message timestamp should be text".to_string(),
+                "JSON response message timestamp should be text".into(),
             ))?,
     )
-    .map_err(|_| ServerError::Parse("Could not parse timestamp".to_string()))?;
+    .map_err(|_| ServerError::Parse("Could not parse timestamp".into()))?;
 
-    Ok(Message::new(content.to_string(), time))
+    Ok(Message::new(content.into(), time))
 }

@@ -3,15 +3,14 @@
 ## First beta version
 
 - [X] Finish implementing functionalities
-- [ ] Check and apply best practices
-  - [ ] Error management
-  - [ ] Builder ?
-  - [ ] String vs &str
-  - [ ] Documentation
+- [X] Check and apply best practices
+  - [X] Error management
+  - [X] Builder ? (not right use)
+  - [X] String vs &str
 - [ ] Split README and reference
 - [ ] Finish CLI help (better explanations, try to add version and author)
-- [ ] Documentation (in code)
 - [ ] Ask for code review on Rust discord
+- [ ] Documentation (in code)
 - [ ] Export public API (and try it)
 - [ ] Finish README with examples
 - [ ] Contact and read by original notify.run author

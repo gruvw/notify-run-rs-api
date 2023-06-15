@@ -31,29 +31,33 @@ pub struct Notify {
 }
 
 impl Notify {
-    pub fn new(api_server: &str, channel_id: &str) -> Result<Notify, UrlError> {
+    pub fn new(channel_id: &str) -> Result<Notify, UrlError> {
+        Self::with_server(DEFAULT_API_SERVER, channel_id)
+    }
+
+    pub fn with_server(api_server: &str, channel_id: &str) -> Result<Notify, UrlError> {
         Ok(Notify {
             api_server: parse_url(api_server)?,
-            channel_id: channel_id.to_string(),
+            channel_id: channel_id.into(),
         })
     }
 
     pub fn from_endpoint(endpoint: &str) -> Result<Notify, UrlError> {
         let parts: Vec<&str> = endpoint.rsplitn(2, '/').collect();
-        let channel_id = parts
-            .first()
-            .ok_or(UrlError::ParseError("Invalid endpoint".to_string()))?;
-        let api_server = parts
-            .get(1)
-            .ok_or(UrlError::ParseError("Invalid endpoint".to_string()))?;
+        let channel_id = parts.first().ok_or(UrlError::ParseError {
+            text: endpoint.into(),
+        })?;
+        let api_server = parts.get(1).ok_or(UrlError::ParseError {
+            text: endpoint.into(),
+        })?;
 
-        Notify::new(api_server, channel_id)
+        Notify::with_server(api_server, channel_id)
     }
 
     pub fn register() -> Result<Notify, ServerError> {
         Notify::register_from(match env::var(API_ENV_VAR) {
             Ok(server) => server,
-            Err(_) => DEFAULT_API_SERVER.to_string(),
+            Err(_) => DEFAULT_API_SERVER.into(),
         })
     }
 
@@ -68,14 +72,11 @@ impl Notify {
             .post(url)
             .header(header::USER_AGENT, USER_AGENT)
             .header(header::CONTENT_LENGTH, 0)
-            .send()
-            .map_err(ServerError::Connection)?;
+            .send()?;
 
-        let text = response
-            .text()
-            .map_err(|err| ServerError::Response(err.status().unwrap(), err))?;
+        let text = response.text()?;
         let json: serde_json::Value = serde_json::from_str(&text)
-            .map_err(|_| ServerError::Parse("Invalid JSON response".to_string()))?;
+            .map_err(|_| ServerError::Parse("Invalid JSON response".into()))?;
 
         let channel = json[CHANNEL_KEY]
             .as_str()
@@ -84,7 +85,7 @@ impl Notify {
                 CHANNEL_KEY
             )))?;
 
-        Notify::new(api_server.as_str(), channel).map_err(ServerError::Url)
+        Notify::with_server(api_server.as_str(), channel).map_err(ServerError::Url)
     }
 
     pub fn is_configured() -> bool {
@@ -92,18 +93,12 @@ impl Notify {
     }
 
     pub fn from_config() -> Result<Notify, ConfigError> {
-        let json: serde_json::Value = serde_json::from_str(
-            &fs::read_to_string(shellexpand::tilde(CONFIG_PATH).as_ref())
-                .map_err(|e| ConfigError::Access(format!("{}", e)))?,
-        )
-        .map_err(|_| ConfigError::Parse("Invalid JSON in config".to_string()))?;
+        let config = fs::read_to_string(shellexpand::tilde(CONFIG_PATH).as_ref())?;
+        let json: serde_json::Value = serde_json::from_str(config.as_str())?;
 
         let endpoint = json[ENDPOINT_KEY]
             .as_str()
-            .ok_or(ConfigError::Parse(format!(
-                "Could not find {} key in JSON config",
-                ENDPOINT_KEY
-            )))?;
+            .ok_or(ConfigError::KeyNotFound(ENDPOINT_KEY.into()))?;
 
         Self::from_endpoint(endpoint).map_err(ConfigError::UrlError)
     }
@@ -113,8 +108,7 @@ impl Notify {
         fs::write(
             shellexpand::tilde(CONFIG_PATH).as_ref(),
             serde_json::to_string(&json).expect("JSON config should always be valid"),
-        )
-        .map_err(|_| ConfigError::Write("Could not write config".to_string()))?;
+        )?;
 
         Self::from_config()
     }
@@ -158,12 +152,9 @@ impl Notify {
             .header(header::ACCEPT, "*/*")
             .form(&params)
             .body(message.to_string())
-            .send()
-            .map_err(ServerError::Connection)?;
+            .send()?;
 
-        response
-            .error_for_status()
-            .map_err(|err| ServerError::Response(err.status().unwrap(), err))?;
+        response.error_for_status()?;
 
         Ok(())
     }
@@ -179,22 +170,19 @@ impl Notify {
         let response = Client::new()
             .get(url)
             .header(header::USER_AGENT, USER_AGENT)
-            .send()
-            .map_err(ServerError::Connection)?;
+            .send()?;
 
-        let text = response
-            .text()
-            .map_err(|err| ServerError::Response(err.status().unwrap(), err))?;
+        let text = response.text()?;
         let json: serde_json::Value = serde_json::from_str(&text)
-            .map_err(|_| ServerError::Parse("Invalid JSON response".to_string()))?;
+            .map_err(|_| ServerError::Parse("Invalid JSON response".into()))?;
 
         json.get(MESSAGES_KEY)
             .ok_or(ServerError::Parse(
-                "JSON response does not contains messages".to_string(),
+                "JSON response does not contains messages".into(),
             ))?
             .as_array()
             .ok_or(ServerError::Parse(
-                "JSON response messages type is not an array".to_string(),
+                "JSON response messages type is not an array".into(),
             ))?
             .iter()
             .map(decode_msg)
