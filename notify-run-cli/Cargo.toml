@@ -1,0 +1,18 @@
+[package]
+name = "notify-run-cli"
+version = "0.1.0"
+edition = "2021"
+description = "A Rust notify.run CLI client for sending notifications to your own phone or desktop."
+homepage = "https://github.com/gruvw/notify-run-rs-api"
+authors = ["gruvw <gruvw.dev@gmail.com>"]
+license = "MIT"
+
+[dependencies]
+notify-run = { version = "0.1.0", path = ".." }
+clap = { version = "4.3.0", features = ["derive"] }
+inquire = "0.6.2"
+
+[[bin]]
+name = "notify-run-rs"
+path = "src/bin.rs"
+doc = false

@@ -8,6 +8,7 @@
   - [ ] Builder ?
   - [ ] String vs &str
   - [ ] Documentation
+- [ ] Split README and reference
 - [ ] Finish CLI help (better explanations, try to add version and author)
 - [ ] Documentation (in code)
 - [ ] Ask for code review on Rust discord

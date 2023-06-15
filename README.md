@@ -1,4 +1,4 @@
-# <img src="https://avatars2.githubusercontent.com/u/53474526?s=200&v=4" height="30" /> notify.run Rust Client
+# <img src="https://avatars2.githubusercontent.com/u/53474526?s=200&v=4" height="30" /> notify.run Rust API Client
 
 **THIS PROJECT IS CURRENTLY UNDER DEVELOPMENT**
 

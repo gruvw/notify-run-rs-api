@@ -2,11 +2,10 @@ use std::{collections::HashMap, env, fmt::Display, fs};
 
 use crate::error::{ConfigError, ServerError, UrlError};
 use crate::message::Message;
-use crate::utils::parse_url;
-use chrono::DateTime;
+use crate::utils::{decode_msg, parse_url};
 use qrcode::{render::unicode, QrCode};
 use reqwest::{blocking::Client, header};
-use serde_json::{self, json, Value};
+use serde_json::{self, json};
 use url::Url;
 
 const DEFAULT_API_SERVER: &str = "https://notify.run/api/";
@@ -14,21 +13,21 @@ const REGISTER_PATH: &str = "register_channel";
 const INFO_PATH: &str = "json";
 const CHANNEL_PATH: &str = "/c/";
 
+pub const MESSAGE_KEY: &str = "message";
+pub const TIME_KEY: &str = "time";
+const MESSAGES_KEY: &str = "messages";
+const ENDPOINT_KEY: &str = "endpoint";
+const ACTION_KEY: &str = "action";
+const CHANNEL_KEY: &str = "channelId";
 const API_ENV_VAR: &str = "NOTIFY_API_SERVER";
 const CONFIG_PATH: &str = "~/.config/notify-run";
 const USER_AGENT: &str = "NotifyRun Rust Client";
-const ENDPOINT_KEY: &str = "endpoint";
-const MESSAGE_KEY: &str = "message";
-const ACTION_KEY: &str = "action";
-const CHANNEL_KEY: &str = "channelId";
-const MESSAGES_KEY: &str = "messages";
-const TIME_KEY: &str = "time";
 
+#[derive(Debug, Clone, PartialEq)]
 // Notification object. Use to access and interact with a notify.run endpoint
 pub struct Notify {
     api_server: Url,
     channel_id: String,
-    client: Client,
 }
 
 impl Notify {
@@ -36,7 +35,6 @@ impl Notify {
         Ok(Notify {
             api_server: parse_url(api_server)?,
             channel_id: channel_id.to_string(),
-            client: Client::new(),
         })
     }
 
@@ -154,8 +152,7 @@ impl Notify {
             params.insert(ACTION_KEY, action);
         }
 
-        let response = self
-            .client
+        let response = Client::new()
             .post(self.endpoint())
             .header(header::USER_AGENT, USER_AGENT)
             .header(header::ACCEPT, "*/*")
@@ -179,8 +176,7 @@ impl Notify {
         let mut url = self.endpoint();
         url.path_segments_mut().unwrap().push(INFO_PATH);
 
-        let response = self
-            .client
+        let response = Client::new()
             .get(url)
             .header(header::USER_AGENT, USER_AGENT)
             .send()
@@ -223,29 +219,4 @@ impl Display for Notify {
             image
         )
     }
-}
-
-fn decode_msg(msg: &Value) -> Result<Message, ServerError> {
-    let content = msg
-        .get(MESSAGE_KEY)
-        .ok_or(ServerError::Parse(
-            "JSON response does not contain message".to_string(),
-        ))?
-        .as_str()
-        .ok_or(ServerError::Parse(
-            "JSON response message content should be text".to_string(),
-        ))?;
-    let time = DateTime::parse_from_rfc3339(
-        msg.get(TIME_KEY)
-            .ok_or(ServerError::Parse(
-                "JSON response message content should have timestamp".to_string(),
-            ))?
-            .as_str()
-            .ok_or(ServerError::Parse(
-                "JSON response message timestamp should be text".to_string(),
-            ))?,
-    )
-    .map_err(|_| ServerError::Parse("Could not parse timestamp".to_string()))?;
-
-    Ok(Message::new(content.to_string(), time))
 }
