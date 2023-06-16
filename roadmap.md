@@ -7,7 +7,7 @@
   - [X] Error management
   - [X] Builder ? (not right use)
   - [X] String vs &str
-- [ ] Split README and reference
+- [X] Split README and reference
 - [ ] Finish CLI help (better explanations, try to add version and author)
 - [ ] Ask for code review on Rust discord
 - [ ] Documentation (in code)
