@@ -1,3 +1,5 @@
+// TODO //!
+
 use std::{collections::HashMap, env, fmt::Display, fs};
 
 use crate::error::{ConfigError, ServerError, UrlError};
@@ -13,8 +15,8 @@ const REGISTER_PATH: &str = "register_channel";
 const INFO_PATH: &str = "json";
 const CHANNEL_PATH: &str = "/c/";
 
-pub const MESSAGE_KEY: &str = "message";
-pub const TIME_KEY: &str = "time";
+pub(crate) const MESSAGE_KEY: &str = "message";
+pub(crate) const TIME_KEY: &str = "time";
 const MESSAGES_KEY: &str = "messages";
 const ENDPOINT_KEY: &str = "endpoint";
 const ACTION_KEY: &str = "action";
@@ -24,7 +26,7 @@ const CONFIG_PATH: &str = "~/.config/notify-run";
 const USER_AGENT: &str = "NotifyRun Rust Client";
 
 #[derive(Debug, Clone, PartialEq)]
-// Notification object. Use to access and interact with a notify.run endpoint
+/// Notification object. Use to access and interact with a notify.run endpoint
 pub struct Notify {
     api_server: Url,
     channel_id: String,
@@ -103,7 +105,7 @@ impl Notify {
         Self::from_endpoint(endpoint).map_err(ConfigError::UrlError)
     }
 
-    pub fn update_config(&self) -> Result<Notify, ConfigError> {
+    pub fn write_to_config(&self) -> Result<Notify, ConfigError> {
         let json = json!({ ENDPOINT_KEY: self.endpoint().as_str() });
         fs::write(
             shellexpand::tilde(CONFIG_PATH).as_ref(),

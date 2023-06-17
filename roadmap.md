@@ -8,10 +8,10 @@
   - [X] Builder ? (not right use)
   - [X] String vs &str
 - [X] Split README and reference
-- [ ] Finish CLI help (better explanations, try to add version and author)
+- [X] Finish CLI help (better explanations)
 - [ ] Ask for code review on Rust discord
-- [ ] Documentation (in code)
-- [ ] Export public API (and try it)
+- [ ] Documentation, examples (in code)
+- [X] Export public API (and try it)
 - [ ] Finish README with examples
 - [ ] Contact and read by original notify.run author
 - [ ] CLI Entrypoint and Library definition

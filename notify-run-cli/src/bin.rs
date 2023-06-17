@@ -3,7 +3,7 @@ mod cli;
 use clap::Parser;
 use cli::{Cli, Commands};
 use inquire::Confirm;
-use notify_run::notify::Notify;
+use notify_run::Notify;
 
 /// NotifyRun Rust Client CLI entrypoint
 fn main() -> Result<(), String> {
@@ -23,7 +23,7 @@ fn main() -> Result<(), String> {
 
             match notify {
                 Ok(notify) => {
-                    notify.update_config().map_err(|e| e.to_string())?;
+                    notify.write_to_config().map_err(|e| e.to_string())?;
                     println!("{}", notify);
                     Ok(())
                 }
@@ -35,7 +35,7 @@ fn main() -> Result<(), String> {
             let notify = Notify::from_endpoint(&args.endpoint).map_err(|e| e.to_string())?;
 
             if should_write(args.force)? {
-                notify.update_config().map_err(|e| e.to_string())?;
+                notify.write_to_config().map_err(|e| e.to_string())?;
             }
 
             Ok(())

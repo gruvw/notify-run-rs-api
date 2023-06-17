@@ -1,72 +1,73 @@
+// TODO //!
+
 use clap::{Args, Parser, Subcommand};
 
 #[derive(Parser)]
-#[command(author, version, about)]
-#[command(propagate_version = true)]
-// CLI application object
-pub struct Cli {
+#[command(author, version, about, name = "notify-run-rs")]
+/// CLI application object
+pub(crate) struct Cli {
     #[command(subcommand)]
-    pub command: Commands,
+    pub(crate) command: Commands,
 }
 
 #[derive(Subcommand)]
-// Possible CLI commands
-pub enum Commands {
+/// Possible CLI commands
+pub(crate) enum Commands {
     /// Configure to an existing endpoint
     Configure(ConfigureArgs),
 
-    /// Get information for subscribing to an endpoint
+    /// Get information for subscribing to an endpoint and lists the previous messages
     Info(InfoArgs),
 
     /// Register a new endpoint
     Register(RegisterArgs),
 
-    // Send a new message
+    /// Send a new notification message
     Send(SendArgs),
 }
 
 #[derive(Args)]
-// Arguments for the configure command
-pub struct ConfigureArgs {
+/// Arguments for the configure command
+pub(crate) struct ConfigureArgs {
     /// Notification endpoint URL
-    pub endpoint: String,
+    pub(crate) endpoint: String,
 
     #[arg(short, long)]
     /// Don't prompt for config overwrite
-    pub force: bool,
+    pub(crate) force: bool,
 }
 
 #[derive(Args)]
-// Arguments for the info command
-pub struct InfoArgs {
+/// Arguments for the info command
+pub(crate) struct InfoArgs {
     #[arg(short, long)]
     /// Notification endpoint URL
-    pub endpoint: Option<String>,
+    pub(crate) endpoint: Option<String>,
 }
 
 #[derive(Args)]
-// Arguments for the register command
-pub struct RegisterArgs {
+/// Arguments for the register command
+pub(crate) struct RegisterArgs {
     #[arg(short, long)]
     /// Set server URL, defaults to https://notify.run/api/ or the value of the NOTIFY_API_SERVER environment variable
-    pub api_server: Option<String>,
+    pub(crate) api_server: Option<String>,
 
     #[arg(short, long)]
     /// Don't prompt for config overwrite
-    pub force: bool,
+    pub(crate) force: bool,
 }
 
 #[derive(Args)]
-// Arguments for the send command
-pub struct SendArgs {
-    /// The message text to be sent.
-    pub message: String,
+/// Arguments for the send command
+pub(crate) struct SendArgs {
+    /// The message text to be sent
+    pub(crate) message: String,
 
     #[arg(short, long)]
     /// Notification endpoint URL
-    pub endpoint: Option<String>,
+    pub(crate) endpoint: Option<String>,
 
     #[arg(short, long)]
     /// An optional URL to open if the notification is clicked.
-    pub action: Option<String>,
+    pub(crate) action: Option<String>,
 }

@@ -8,7 +8,7 @@ use crate::{
     notify::{MESSAGE_KEY, TIME_KEY},
 };
 
-pub fn parse_url(text: &str) -> Result<Url, UrlError> {
+pub(crate) fn parse_url(text: &str) -> Result<Url, UrlError> {
     if let Ok(url) = Url::parse(text) {
         let scheme = url.scheme();
         if scheme == "http" || scheme == "https" {
@@ -23,7 +23,7 @@ pub fn parse_url(text: &str) -> Result<Url, UrlError> {
     }
 }
 
-pub fn decode_msg(msg: &Value) -> Result<Message, ServerError> {
+pub(crate) fn decode_msg(msg: &Value) -> Result<Message, ServerError> {
     let content = msg
         .get(MESSAGE_KEY)
         .ok_or(ServerError::Parse(

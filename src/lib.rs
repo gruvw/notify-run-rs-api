@@ -1,4 +1,9 @@
-mod error;
+// TODO //!
+
 mod message;
-pub mod notify;
+mod notify;
 mod utils;
+
+pub mod error;
+pub use message::Message;
+pub use notify::Notify;

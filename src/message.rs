@@ -1,3 +1,5 @@
+// TODO //!
+
 use std::fmt::Display;
 
 use chrono::{DateTime, FixedOffset, Utc};
@@ -8,8 +10,16 @@ pub struct Message {
 }
 
 impl Message {
-    pub fn new(content: String, time: DateTime<FixedOffset>) -> Message {
+    pub(crate) fn new(content: String, time: DateTime<FixedOffset>) -> Message {
         Message { content, time }
+    }
+
+    pub fn content(&self) -> &String {
+        &self.content
+    }
+
+    pub fn time(&self) -> &DateTime<FixedOffset> {
+        &self.time
     }
 }
 
