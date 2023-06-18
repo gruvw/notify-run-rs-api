@@ -2,13 +2,15 @@
 
 **THIS PROJECT IS CURRENTLY UNDER DEVELOPMENT**
 
-**[notify.run](https://notify.run) makes it easy to programmatically send notifications to your own phone or desktop.** It is provided as a free web service that can be used without installation (on both the sending and receiving end).
+A Rust client for sending notifications to your own phone or desktop.
 
-This repository contains a [**CLI Client**](https://github.com/gruvw/notify-run-rs-api/notify-run-cli) as well as an easy to use [**Rust API**](https://github.com/gruvw/notify-run-rs-api).
+**[notify.run](https://notify.run) makes it easy to programmatically send notifications to your own phone or desktop.**
 
-See the original Python Client & API: https://github.com/notify-run/notify.run
+This repository contains a [**CLI Client**](https://github.com/gruvw/notify-run-rs-api/tree/main/notify-run-cli) as well a [**Rust API**](https://github.com/gruvw/notify-run-rs-api).
 
-The [notify.run Rust backend](https://github.com/notify-run/notify-run-rs) is also open-source and MIT licensed, but support for self-hosting is a low priority use case.
+See the original Python Client and API: [notify-run/notify.run](https://github.com/notify-run/notify.run). The [notify.run Rust backend](https://github.com/notify-run/notify-run-rs) is also open-source and MIT licensed, but support for self-hosting is a low priority use case.
+
+**Note**: PRs are welcome if you want add features or improve existing ones.
 
 ## Installation
 

@@ -4,6 +4,7 @@ use std::fmt::Display;
 
 use chrono::{DateTime, FixedOffset, Utc};
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Message {
     content: String,
     time: DateTime<FixedOffset>,

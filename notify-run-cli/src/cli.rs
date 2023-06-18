@@ -2,16 +2,16 @@
 
 use clap::{Args, Parser, Subcommand};
 
+/// CLI application object
 #[derive(Parser)]
 #[command(author, version, about, name = "notify-run-rs")]
-/// CLI application object
 pub(crate) struct Cli {
     #[command(subcommand)]
     pub(crate) command: Commands,
 }
 
-#[derive(Subcommand)]
 /// Possible CLI commands
+#[derive(Subcommand)]
 pub(crate) enum Commands {
     /// Configure to an existing endpoint
     Configure(ConfigureArgs),
@@ -26,48 +26,48 @@ pub(crate) enum Commands {
     Send(SendArgs),
 }
 
-#[derive(Args)]
 /// Arguments for the configure command
+#[derive(Args)]
 pub(crate) struct ConfigureArgs {
     /// Notification endpoint URL
     pub(crate) endpoint: String,
 
-    #[arg(short, long)]
     /// Don't prompt for config overwrite
+    #[arg(short, long)]
     pub(crate) force: bool,
 }
 
-#[derive(Args)]
 /// Arguments for the info command
+#[derive(Args)]
 pub(crate) struct InfoArgs {
-    #[arg(short, long)]
     /// Notification endpoint URL
+    #[arg(short, long)]
     pub(crate) endpoint: Option<String>,
 }
 
-#[derive(Args)]
 /// Arguments for the register command
+#[derive(Args)]
 pub(crate) struct RegisterArgs {
-    #[arg(short, long)]
     /// Set server URL, defaults to https://notify.run/api/ or the value of the NOTIFY_API_SERVER environment variable
+    #[arg(short, long)]
     pub(crate) api_server: Option<String>,
 
-    #[arg(short, long)]
     /// Don't prompt for config overwrite
+    #[arg(short, long)]
     pub(crate) force: bool,
 }
 
-#[derive(Args)]
 /// Arguments for the send command
+#[derive(Args)]
 pub(crate) struct SendArgs {
     /// The message text to be sent
     pub(crate) message: String,
 
-    #[arg(short, long)]
     /// Notification endpoint URL
+    #[arg(short, long)]
     pub(crate) endpoint: Option<String>,
 
-    #[arg(short, long)]
     /// An optional URL to open if the notification is clicked.
+    #[arg(short, long)]
     pub(crate) action: Option<String>,
 }

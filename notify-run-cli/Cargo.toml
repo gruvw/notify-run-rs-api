@@ -6,6 +6,8 @@ description = "A Rust notify.run CLI client for sending notifications to your ow
 homepage = "https://github.com/gruvw/notify-run-rs-api"
 authors = ["gruvw <gruvw.dev@gmail.com>"]
 license = "MIT"
+keywords = ["notify.run", "notify", "run", "notification"]
+categories = ["api-bindings", "config", "command-line-utilities"]
 
 [dependencies]
 notify-run = { version = "0.1.0", path = ".." }

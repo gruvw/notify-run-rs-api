@@ -25,8 +25,8 @@ const API_ENV_VAR: &str = "NOTIFY_API_SERVER";
 const CONFIG_PATH: &str = "~/.config/notify-run";
 const USER_AGENT: &str = "NotifyRun Rust Client";
 
-#[derive(Debug, Clone, PartialEq)]
 /// Notification object. Use to access and interact with a notify.run endpoint
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Notify {
     api_server: Url,
     channel_id: String,

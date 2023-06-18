@@ -5,6 +5,16 @@ use std::io;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
+pub enum NotifyError {
+    #[error("url error > {0}")]
+    UrlError(#[from] UrlError),
+    #[error("server error > {0}")]
+    ServerError(#[from] ServerError),
+    #[error("config error > {0}")]
+    ConfigError(#[from] ConfigError),
+}
+
+#[derive(Error, Debug)]
 pub enum UrlError {
     #[error("the provided text could not be parsed as a valid URL, provided: {text:?}")]
     ParseError { text: String },

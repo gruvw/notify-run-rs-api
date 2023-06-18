@@ -3,9 +3,12 @@ name = "notify-run"
 version = "0.1.0"
 edition = "2021"
 description = "A Rust notify.run client for sending notifications to your own phone or desktop."
-homepage = "https://github.com/gruvw/notify-run-rs-api"
+documentation = "https://docs.rs/notify-run"
 authors = ["gruvw <gruvw.dev@gmail.com>"]
+homepage = "https://github.com/gruvw/notify-run-rs-api"
 license = "MIT"
+keywords = ["notify.run", "notify", "run", "notification"]
+categories = ["api-bindings", "config"]
 
 [workspace]
 members = ["notify-run-cli"]
