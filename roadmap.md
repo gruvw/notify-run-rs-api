@@ -16,3 +16,7 @@
 - [ ] Finish README with examples
 - [ ] Contact and read by original notify.run author
 - [ ] Publish to crates.io
+
+## Tests
+
+- [ ] Add tests (mainly not prevent unexpected breaking changes), tests should not send network requests (http mocking)

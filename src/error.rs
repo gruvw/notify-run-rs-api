@@ -1,9 +1,9 @@
-// TODO //!
+//! This module contains every error type used in the `notify-run` crate.
 
 use std::io;
-
 use thiserror::Error;
 
+/// Utility wrapper error used to take in every error that `notify-run` could emit.
 #[derive(Error, Debug)]
 pub enum NotifyError {
     #[error("url error > {0}")]
@@ -14,6 +14,7 @@ pub enum NotifyError {
     ConfigError(#[from] ConfigError),
 }
 
+/// The error used when the url passed is not valid.
 #[derive(Error, Debug)]
 pub enum UrlError {
     #[error("the provided text could not be parsed as a valid URL, provided: {text:?}")]
@@ -22,6 +23,7 @@ pub enum UrlError {
     InvalidScheme { scheme: String },
 }
 
+/// The error used when the communication to the notify server was not successful.
 #[derive(Error, Debug)]
 pub enum ServerError {
     #[error("wrong server url > {0}")]
@@ -32,6 +34,7 @@ pub enum ServerError {
     Parse(String),
 }
 
+/// The error used when the configuration of the notify server could not be retrieved successfully.
 #[derive(Error, Debug)]
 pub enum ConfigError {
     #[error("could not read/write config > {0}")]

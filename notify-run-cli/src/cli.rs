@@ -1,4 +1,4 @@
-// TODO //!
+//! This module defines the CLI interface of the application. (using [clap])
 
 use clap::{Args, Parser, Subcommand};
 

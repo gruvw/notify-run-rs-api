@@ -1,3 +1,5 @@
+//! The notify.run Rust Client entrypoint module.
+
 mod cli;
 
 use clap::Parser;
@@ -5,7 +7,7 @@ use cli::{Cli, Commands};
 use inquire::Confirm;
 use notify_run::Notify;
 
-/// NotifyRun Rust Client CLI entrypoint
+/// notify.run Rust Client CLI entrypoint
 fn main() -> Result<(), String> {
     let cli = Cli::parse();
 

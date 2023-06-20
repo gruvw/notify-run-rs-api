@@ -1,13 +1,12 @@
 // TODO //!
 
-use std::{collections::HashMap, env, fmt::Display, fs};
-
 use crate::error::{ConfigError, ServerError, UrlError};
 use crate::message::Message;
 use crate::utils::{decode_msg, parse_url};
 use qrcode::{render::unicode, QrCode};
 use reqwest::{blocking::Client, header};
 use serde_json::{self, json};
+use std::{collections::HashMap, env, fmt::Display, fs};
 use url::Url;
 
 const DEFAULT_API_SERVER: &str = "https://notify.run/api/";
